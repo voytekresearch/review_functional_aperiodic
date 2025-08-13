@@ -1,0 +1,13 @@
+numpy
+scipy
+pandas
+matplotlib
+seaborn
+neurodsp
+specparam
+quantities
+neo
+elephant
+lisc
+jupyter
+ipykernel
