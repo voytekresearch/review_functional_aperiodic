@@ -225,10 +225,10 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv, fit):
         ax.spines['right'].set_visible(False)
         
     # add figure panel labels
-    fig.text(0.002, 0.95, 'a', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.700, 0.95, 'b', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.002, 0.48, 'c', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.700, 0.48, 'd', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.002, 0.96, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.700, 0.96, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.002, 0.48, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.700, 0.48, '(D)', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save/show
     fig.savefig(os.path.join(FIGURE_PATH, 'figure_3'))

@@ -279,9 +279,9 @@ def plot_results(spikes, time, lfp, freqs, spectra, sync, exp, reg):
     ax4.set_title('Linear regression')
 
     # add subplot labels
-    fig.text(0.01, 0.97, 'A.', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.01, 0.33, 'B.', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.52, 0.33, 'C.', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.97, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.34, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.52, 0.34, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save
     plt.savefig(os.path.join(FIGURE_PATH, 'figure_2'))

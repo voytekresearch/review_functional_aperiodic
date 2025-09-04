@@ -77,8 +77,8 @@ def main():
     plot_words_analysis(ax_b, APERIODIC_TERMS, SELECT_TERMS)
 
     # add panel labels
-    fig.text(0.01, 0.98, 'A.', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.51, 0.98, 'B.', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.99, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.51, 0.99, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save figure
     plt.savefig(os.path.join(FIGURE_PATH, 'figure_4'), bbox_inches='tight')
