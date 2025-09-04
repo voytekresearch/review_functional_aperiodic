@@ -4,6 +4,11 @@ Figure 1: Basic model of aperiodic activity
 This figure will illustrate a basic model of aperiodic neural activity, 
 i.e. the filtered point process model.
 
+Panels:
+    a, synaptic current contributions to the LFP
+    b, field potential time-series
+    c, postsynaptic potentials time-series
+    d, postsynaptic potentials spectra
 """
 
 # IMPORTS ######################################################################
@@ -62,25 +67,26 @@ def main():
     fig = plt.figure(figsize=[FIGURE_WIDTH, 6], constrained_layout=True)
     spec = gridspec.GridSpec(ncols=2, nrows=3, figure=fig, width_ratios=[1,1],
                              height_ratios=[1, 0.6, 1], hspace=0.1)
-    ax_a0 = fig.add_subplot(spec[0, :])
-    ax_a1 = fig.add_subplot(spec[1, :])
-    ax_b = fig.add_subplot(spec[2, 0])
-    ax_c = fig.add_subplot(spec[2, 1])
+    ax_a = fig.add_subplot(spec[0, :])
+    ax_b = fig.add_subplot(spec[1, :])
+    ax_c = fig.add_subplot(spec[2, 0])
+    ax_d = fig.add_subplot(spec[2, 1])
 
     # plot panels
-    plot_panel_a(ax_a0, ax_a1)
-    plot_panel_bc(fig, ax_b, ax_c)
+    plot_panel_ab(ax_a, ax_b)
+    plot_panel_cd(fig, ax_c, ax_d)
 
     # add panel labels
-    fig.text(0.01, 0.97, 'A.', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.04, 0.35, 'B.', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.56, 0.35, 'C.', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.97, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.65, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.35, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.56, 0.35, '(D)', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save
     plt.savefig(os.path.join(FIGURE_PATH, 'figure_1'), bbox_inches='tight')
 
 
-def plot_panel_a(ax_a0, ax_a1):
+def plot_panel_ab(ax_a, ax_b):
     """
     Plot subpanel a, synaptic current contributions to the LFP
     """
@@ -109,38 +115,36 @@ def plot_panel_a(ax_a0, ax_a1):
 
     # plot currents 
     for i_current in range(n2plot):
-        ax_a0.plot(time_current, currents[i_current] + i_current, color='k')
-    ax_a0.set(xlabel="", ylabel="current (au)")
-    ax_a0.set_title("Synaptic currents")
+        ax_a.plot(time_current, currents[i_current] + i_current, color='k')
+    ax_a.set(xlabel="", ylabel="current (au)")
+    ax_a.set_title("Synaptic currents")
 
     # add annotation to right of ax indication that this is a subset of currents
-    ax_a0b = ax_a0.twinx()
-    ax_a0b.set_ylim(ax_a0.get_ylim())
+    ax_a0b = ax_a.twinx()
+    ax_a0b.set_ylim(ax_a.get_ylim())
     ax_a0b.tick_params(axis='y', length=0)  # hide ticks
-    ax_a0b.text(1.04, 0.5, "neuron index", transform=ax_a0.transAxes, 
+    ax_a0b.text(1.04, 0.5, "neuron index", transform=ax_a.transAxes, 
             ha='center', va='center', color='k', rotation=270)
     ax_a0b.set_yticks(np.arange(0, n2plot))
     ax_a0b.set_yticklabels(['N', r'$\cdots$', '8', '7', '6', '5', '4', '3', '2', '1'])
 
     # plot LFP
-    ax_a1.plot(time, lfp, color='k')
-    ax_a1.set(xlabel="time (s)", ylabel="voltage (au)")
-    ax_a1.set_title("Field potential")
+    ax_b.plot(time, lfp, color='k')
+    ax_b.set(xlabel="time (s)", ylabel="voltage (au)")
+    ax_b.set_title("Field potential")
 
     # remove y-ticks 
-    for ax in [ax_a0, ax_a1]:
+    for ax in [ax_a, ax_b]:
         ax.set_yticks([])
 
 
-def plot_panel_bc(fig, ax_b, ax_c):
+def plot_panel_cd(fig, ax_c, ax_d):
     """
     Plot subpanels.
 
-    b, postsynaptic potentials time-series
-    c, postsynaptic potentials spectra
+    c, postsynaptic potentials time-series
+    d, postsynaptic potentials spectra
     """
-
-    # Figure A - add dirac
 
     # settings
     fs = 100000
@@ -177,27 +181,27 @@ def plot_panel_bc(fig, ax_b, ax_c):
 
     # plot
     for ii, timescale in enumerate(timescales_ms):
-        ax_b.plot(time*1000, psp[ii], color=sm.to_rgba(timescale))
-        ax_c.loglog(freqs, spectra[ii], color=sm.to_rgba(timescale))
+        ax_c.plot(time*1000, psp[ii], color=sm.to_rgba(timescale))
+        ax_d.loglog(freqs, spectra[ii], color=sm.to_rgba(timescale))
 
     # plot delta function representation
-    ax_b.plot([0, 0], [0, np.max(psp)], color='k')  # vertical line at t=0
-    ax_b.plot(time*1000, np.zeros_like(time), color='k')  # horizontal line at y=0
-    ax_c.loglog(freqs, spectra[-1], color='k')
+    ax_c.plot([0, 0], [0, np.max(psp)], color='k')  # vertical line at t=0
+    ax_c.plot(time*1000, np.zeros_like(time), color='k')  # horizontal line at y=0
+    ax_d.loglog(freqs, spectra[-1], color='k')
 
     # label plot
-    ax_b.set_title("Postsynaptic potential")
-    ax_b.set(xlabel="time (ms)", ylabel="voltage (au)")
-    ax_b.set_xlim([-0.05, 1.0])
+    ax_c.set_title("Postsynaptic potential")
+    ax_c.set(xlabel="time (ms)", ylabel="voltage (au)")
+    ax_c.set_xlim([-0.05, 1.0])
 
-    ax_c.set_title("Power spectrum")
-    ax_c.set(xlabel="frequency (Hz)", ylabel="power (au)")
+    ax_d.set_title("Power spectrum")
+    ax_d.set(xlabel="frequency (Hz)", ylabel="power (au)")
 
     # add colorbar for timescale
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-    cbax = inset_axes(ax_c, width="3%", height="90%", loc='lower left',
+    cbax = inset_axes(ax_d, width="3%", height="90%", loc='lower left',
                       bbox_to_anchor=(1.02, 0.05, 1, 1), 
-                      bbox_transform=ax_c.transAxes, borderpad=0)
+                      bbox_transform=ax_d.transAxes, borderpad=0)
     fig.colorbar(sm, cax=cbax, label='timescale (ms)')
 
 
