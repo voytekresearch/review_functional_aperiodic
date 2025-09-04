@@ -181,7 +181,7 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv, fit):
         if ii != 4:
             ax.set_xticks([])
     ax_a4.spines['bottom'].set_visible(True)
-    ax_a4.set(xlabel='time (sec)')
+    ax_a4.set(xlabel='time (s)')
     fig.text(0.015, 0.76, 'Voltage (au)', ha='center', va='center', rotation=90, 
              fontsize=8)
 
@@ -200,7 +200,7 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv, fit):
     ax_c.plot(time[:n_samples], np.repeat(sig_var_win[0], n_samples), color='k')
     ax_c.plot(time[n_samples:], np.repeat(sig_var_win[1], n_samples), color='k')
     ax_c.axvline(0, color='grey', linestyle='--', linewidth=3)
-    ax_c.set(xlabel='time (sec)', ylabel='variance')
+    ax_c.set(xlabel='time (s)', ylabel='variance')
 
     # plot subplot d: TTV v. Exponent
     ax_d.plot(ttv, exponent, color='k', marker='o')
