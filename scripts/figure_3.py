@@ -158,7 +158,7 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv, fit):
     # create figure and gridspec
     fig = plt.figure(figsize=[FIGURE_WIDTH, 4], constrained_layout=True)
     spec = gridspec.GridSpec(figure=fig, ncols=2, nrows=2, hspace=0.1,
-                             width_ratios=[1, 0.36], height_ratios=[1,1])
+                             width_ratios=[1, 0.4], height_ratios=[1,1])
     ax_b = fig.add_subplot(spec[0,1])
     ax_c = fig.add_subplot(spec[1,0])
     ax_d = fig.add_subplot(spec[1,1])
@@ -212,7 +212,7 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv, fit):
     ax_a0.set_title('Simulated neural time-series')
     ax_b.set_title('Power spectra')
     ax_c.set_title('Trial-to-trial variability (TTV)')
-    ax_d.set_title('TTV v exponent')
+    ax_d.set_title('TTV v. exponent')
 
     # limit x-ticks
     for ax in [ax_a4, ax_c]:
