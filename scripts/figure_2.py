@@ -1,6 +1,8 @@
 """
-Figure 2: Spike synchrony
+Figure 2: Spike synchrony + damped oscillators
+===============================
 
+Spike synchrony:
 This figure will demonstrate the relationship between population spike synchrony 
 and the aperiodic exponent of the field potential in biophysically-informed
 neural simulations.
@@ -15,6 +17,10 @@ where $m$ is the mean firing rate of the neuron, $W$ is white-noise, $OU$ is
 the global rate fluctuations (modelled as an Ornstein–Uhlenbeck process), and 
 $CS$ is the coupling-strength
 
+Damped oscillators:
+This figure will demonstrate the relationship between damped oscillators and
+the aperiodic exponent of the field potential in simulated neural data.
+
 """
 
 # IMPORTS ######################################################################
@@ -25,6 +31,7 @@ import numpy as np
 from scipy.stats import linregress
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+import seaborn as sns
 from neurodsp.spectral import compute_spectrum
 
 # spike simulation and analysis
@@ -47,9 +54,10 @@ from settings import FIGURE_PATH, FIGURE_WIDTH, PANEL_FONTSIZE
 FS = 1000 # sampling frequency (1/dt)
 N_SECONDS = 5 # duration of simulation (sec) 
 N_NEURONS = 1000 # number of neurons in population
+np.random.seed(0)
 
 # analysis
-F_RANGE = [1,100]
+F_RANGE = [1, 100]
 
 # figure
 plt.style.use('mplstyle/trends_cogn_sci.mplstyle')
@@ -58,7 +66,7 @@ COLORS = ["#7570b3", "#3FAA96", "#F39943"]
 # SET-UP #######################################################################
 
 # set random seed
-np.random.seed(42)
+np.random.seed(37)
 
 # create output directory
 if not os.path.exists(FIGURE_PATH):
@@ -68,12 +76,27 @@ if not os.path.exists(FIGURE_PATH):
 
 def main():
 
-    # run simulations
+    # run simulation for panels A-C
     spikes, time, lfp, freqs, spectra = simulate_three_levels()
-    synchrony, exponent, reg = correlate_synchrony_and_exponent()
+    sync, exp, reg = correlate_synchrony_and_exponent()
 
-    # plot results
-    plot_results(spikes, time, lfp, freqs, spectra, synchrony, exponent, reg)
+    # init figure
+    fig = plt.figure(figsize=[FIGURE_WIDTH, 8], constrained_layout=True)
+    spec = gridspec.GridSpec(ncols=2, nrows=5, figure=fig, width_ratios=[1,1],
+                             height_ratios=[1, 1, 1, 2, 3], wspace=0)
+
+    # plot panels
+    plot_abc(fig, spec, spikes, time, lfp, freqs, spectra, sync, exp, reg)
+    plot_d(fig, spec)
+
+    # add subplot labels
+    fig.text(0.00, 0.99, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.00, 0.51, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.52, 0.51, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.00, 0.25, '(D)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+
+    # save
+    plt.savefig(os.path.join(FIGURE_PATH, 'figure_2'), bbox_inches='tight')
 
 
 def simulate_2_process_lfp(coupled, coupling_strength, n_seconds=1, fs=1000,
@@ -217,24 +240,16 @@ def correlate_synchrony_and_exponent():
     return synchrony, exponent, reg
 
 
-def plot_results(spikes, time, lfp, freqs, spectra, sync, exp, reg):
+def plot_abc(fig, spec, spikes, time, lfp, freqs, spectra, sync, exp, reg):
     """
-    Plot Figure 2.
+    Plot Figure 2 - panels A-D.
 
     a, spike raster and LFP for 3 populations with varying synchrony levels
     b, power spectral density (PSD) for the 3 populations
     c, correlation between synchrony and exponent
     """
 
-    # labels
-    labels = ['Desync.', 'Low-sync.', 'High-sync.']
-
-    # create figure and axes
-    fig = plt.figure(figsize=[FIGURE_WIDTH, 6], constrained_layout=True)
-
-    # set up gridspec
-    spec = gridspec.GridSpec(ncols=2, nrows=4, figure=fig, width_ratios=[1,1],
-                             height_ratios=[1, 1, 1, 2], wspace=0)
+    # create subplots
     ax0 = fig.add_subplot(spec[0, :])
     ax1 = fig.add_subplot(spec[1, :])
     ax2 = fig.add_subplot(spec[2, :])
@@ -255,6 +270,7 @@ def plot_results(spikes, time, lfp, freqs, spectra, sync, exp, reg):
     ax2.set(xlabel='time (s)', ylabel='neuron #')
 
     # plot PSD
+    labels = ['desync.', 'low-sync.', 'high-sync.']
     for ii in range(len(spectra)):
         ax3.loglog(freqs, spectra[ii], color=COLORS[ii])
         ax3.set(xlabel='frequency (Hz)', ylabel='power (au)')
@@ -268,7 +284,7 @@ def plot_results(spikes, time, lfp, freqs, spectra, sync, exp, reg):
     model = [sync.min() * reg[0] + reg[1],
              sync.max() * reg[0] + reg[1]]
     ax4.plot([sync.min(), sync.max()], model, color='k', linestyle='--',
-             label=f'r: {np.round(reg[2], 3)} \np: {reg[3]:0.1e}')
+             label=f'r: {np.round(reg[2], 3)} \np: {reg[3]:0.2e}')
     ax4.legend(loc='lower right')
 
     # set titles
@@ -278,13 +294,80 @@ def plot_results(spikes, time, lfp, freqs, spectra, sync, exp, reg):
     ax3.set_title('Power spectra')
     ax4.set_title('Linear regression')
 
-    # add subplot labels
-    fig.text(0.01, 0.97, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.01, 0.34, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.52, 0.34, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
-    # save
-    plt.savefig(os.path.join(FIGURE_PATH, 'figure_2'))
+def damped_oscillator(t, f, alpha, gamma):
+    """Simulate a damped oscillator.
+    
+    Parameters
+    ----------
+    t : array_like
+        Time array.
+    f : float
+        Frequency of the oscillator.
+    alpha : float
+        Amplitude scaling factor.
+    gamma : float
+        Damping factor.
+
+    Returns
+    -------
+    array_like
+        Damped oscillator.
+    """
+
+    return np.cos(2 * np.pi * f * alpha * t) * np.exp(-gamma * t)
+
+
+def plot_d(fig, spec, n_seconds=10, fs=1000, osc_freq=10):
+    """
+    Plot Figure 2 - panel D.
+
+    d, damped oscillators with varying damping factors and their spectra
+    """
+
+    # settings
+    colors = sns.color_palette("viridis", 4)
+
+    # simulate damped oscillator
+    time = np.arange(0, n_seconds, 1/fs)
+    damping_factors = [0.1, 1, 10, 50]
+    signals = np.empty((len(damping_factors), len(time)))
+    for ii, gamma in enumerate(damping_factors):
+        signals[ii] = damped_oscillator(time, osc_freq, 1, gamma)
+
+    # compute spectra
+    freqs, spectra = compute_spectrum(signals, FS, method='welch', nperseg=FS*8, 
+                                      f_range=[4, 100])
+
+    # init nested gridspec
+    gs = gridspec.GridSpecFromSubplotSpec(4, 3, subplot_spec=spec[4, :],
+                                          width_ratios=[0.1, 2, 1])
+    axes_0 = [fig.add_subplot(gs[i, 1]) for i in range(4)]
+    ax1 = fig.add_subplot(gs[:, 2])
+
+    # plot damped signals
+    for ii, (ax, signal_i) in enumerate(zip(axes_0, signals)):
+        ax.plot(time, signal_i, color=colors[ii])
+        ax.set(xlabel="time (s)")
+        ax.set_xlim([0, 2])
+        ax.label_outer()
+        ax.set_ylim([-1, 1])
+        ax.set_yticks([])
+    for ax in axes_0[:-2]:
+        ax.set_xticks([])
+    axes_0[-1].set_xticks([0, 1, 2], labels=['0', '1', '2'])
+    axes_0[0].set_title("Damped oscillators")
+    fig.text(0.00, 0.14, 'amplitude (au)', va='center', rotation='vertical', 
+             fontsize=10)
+
+    # plot spectra
+    for ii in range(spectra.shape[0]):
+        ax1.loglog(freqs, spectra[ii], color=colors[ii],
+                   label=f"\u03B3 = {damping_factors[ii]} Hz")
+    ax1.set(xlabel="frequency (Hz)", ylabel="power (au)")
+    ax1.set_xticks([10, 100], labels=['10', '100'])
+    ax1.set_title("Power spectra")
+    ax1.legend()
 
 
 if __name__ == "__main__":
