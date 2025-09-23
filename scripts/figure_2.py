@@ -91,9 +91,9 @@ def main():
 
     # add subplot labels
     fig.text(0.00, 0.99, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.00, 0.51, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.52, 0.51, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.00, 0.25, '(D)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.00, 0.54, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.52, 0.54, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.00, 0.27, '(D)', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save
     plt.savefig(os.path.join(FIGURE_PATH, 'figure_2'), bbox_inches='tight')
@@ -267,6 +267,10 @@ def plot_abc(fig, spec, spikes, time, lfp, freqs, spectra, sync, exp, reg):
         axr = ax.twinx() 
         axr.plot(time[:len(lfp[0])], lfp[ii], linewidth=1, color=COLORS[ii])
         axr.set(ylabel='voltage (au)')
+
+    # labels
+    for ax in [ax0, ax1]:
+        ax.set_xticks([])
     ax2.set(xlabel='time (s)', ylabel='neuron #')
 
     # plot PSD
@@ -340,10 +344,11 @@ def plot_d(fig, spec, n_seconds=10, fs=1000, osc_freq=10):
                                       f_range=[4, 100])
 
     # init nested gridspec
-    gs = gridspec.GridSpecFromSubplotSpec(4, 3, subplot_spec=spec[4, :],
-                                          width_ratios=[0.1, 2, 1])
-    axes_0 = [fig.add_subplot(gs[i, 1]) for i in range(4)]
-    ax1 = fig.add_subplot(gs[:, 2])
+    gs = gridspec.GridSpecFromSubplotSpec(5, 3, subplot_spec=spec[4, :],
+                                          width_ratios=[0.1, 2, 1],
+                                          height_ratios=[0.1, 1, 1, 1, 1])
+    axes_0 = [fig.add_subplot(gs[i, 1]) for i in range(1, 5)]
+    ax1 = fig.add_subplot(gs[1:, 2])
 
     # plot damped signals
     for ii, (ax, signal_i) in enumerate(zip(axes_0, signals)):
@@ -353,7 +358,7 @@ def plot_d(fig, spec, n_seconds=10, fs=1000, osc_freq=10):
         ax.label_outer()
         ax.set_ylim([-1, 1])
         ax.set_yticks([])
-    for ax in axes_0[:-2]:
+    for ax in axes_0[:-1]:
         ax.set_xticks([])
     axes_0[-1].set_xticks([0, 1, 2], labels=['0', '1', '2'])
     axes_0[0].set_title("Damped oscillators")
