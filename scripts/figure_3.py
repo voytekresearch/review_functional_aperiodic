@@ -60,10 +60,10 @@ def main():
     time, signal, freqs, spectra = simulate_time_series()
 
     # regress ttv on aperiodic exponents
-    exponent, ttv, fit = run_simulation()
+    exponent, ttv = run_simulation()
 
     # plot results
-    plot_results(time, signal, freqs, spectra, exponent, ttv, fit)
+    plot_results(time, signal, freqs, spectra, exponent, ttv)
 
 
 def simulate_time_series():
@@ -130,18 +130,14 @@ def run_simulation():
             signals[i_delta, i_trial] = rotate_timeseries(signal_i, FS, delta, 
                                                           F_ROTATION)
 
-    # calculate TTV
+    # calculate TTV and exponents
     ttv = np.mean(np.std(signals, axis=1)**2, axis=1)
-
-    # run regression
     exponent = init_exponent - deltas
-    reg = linregress(np.log10(ttv), exponent)
-    fit = reg[0] * np.log10(ttv) + reg[1]
 
-    return exponent, ttv, fit
+    return exponent, ttv
 
 
-def plot_results(time, signal, freqs, spectra, exponent, ttv, fit):
+def plot_results(time, signal, freqs, spectra, exponent, ttv):
     """
     Plot Figure 3.
     
@@ -204,7 +200,6 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv, fit):
 
     # plot subplot d: TTV v. Exponent
     ax_d.plot(ttv, exponent, color='k', marker='o')
-    ax_d.plot(ttv, fit, color='r')
     ax_d.set_xscale('log')
     ax_d.set(xlabel='variability (TTV)', ylabel='exponent')
 
