@@ -79,21 +79,22 @@ def simulate_time_series():
     # define time vector
     time = create_times(N_SECONDS, FS, start_val=-N_SECONDS/2)
 
-    # initialize array
+    # initialize array - account for edge effect that will be dropped
     n_samples = N_SECONDS*FS//2
     signal = np.zeros([N_TRIALS, n_samples*2])
+    edge = FS // 2
+    n_seconds = (n_samples + edge) / FS
 
     # simulate neural time-series
     for i_trial in range(N_TRIALS):
         # simulate neural time-series (first half of trial)
-        i_sig = sim_powerlaw(N_SECONDS/2, FS, exponent=EXPONENT, 
+        i_sig = sim_powerlaw(n_seconds, FS, exponent=EXPONENT, 
                              f_range=[1,None])
-        signal[i_trial, :n_samples] = i_sig
+        signal[i_trial, :n_samples] = i_sig[edge//2 : -edge//2]
         
         # rotate simulated neural time-series (second half of trial)
-        signal[i_trial, n_samples:] = rotate_timeseries(i_sig, FS, 
-                                                       DELTA_EXPONENT, 
-                                                       F_ROTATION)
+        temp = rotate_timeseries(i_sig, FS, DELTA_EXPONENT, F_ROTATION)
+        signal[i_trial, n_samples:] = temp[edge//2 : -edge//2]
 
     # compute spectra for pre- and post-stimulus periods
     freqs, psd_0 = compute_spectrum(signal[:,:n_samples], fs=FS,
@@ -123,7 +124,6 @@ def run_simulation():
     for i_trial in range(N_TRIALS):
         # simulate neural time-series
         signal_i = sim_powerlaw(N_SECONDS/2, FS, exponent=init_exponent)
-        # signal = sim_powerlaw(N_SECONDS/2, FS, exponent=exponent, f_range=[1, None]) # same results
         
         # rotate
         for i_delta, delta in enumerate(deltas):
@@ -191,7 +191,7 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv):
     sig_var = np.std(signal, 0)**2 # compute across-trial variance
     sig_var_win = np.array([sig_var[:n_samples].mean(), 
                             sig_var[n_samples:].mean()])
-    ax_c.plot(time[:n_samples], sig_var[:n_samples], color=COLS[0])
+    ax_c.plot(time[:n_samples+1], sig_var[:n_samples+1], color=COLS[0])
     ax_c.plot(time[n_samples:], sig_var[n_samples:], color=COLS[1])
     ax_c.plot(time[:n_samples], np.repeat(sig_var_win[0], n_samples), color='k')
     ax_c.plot(time[n_samples:], np.repeat(sig_var_win[1], n_samples), color='k')
