@@ -149,7 +149,7 @@ def plot_panel_cd(fig, ax_c, ax_d):
     # settings
     fs = 100000
     t_ker = 1
-    timescales = np.logspace(-4.5, -3, 8)  # logspace from 10^-4 to 10^-3
+    timescales = np.logspace(-4, -3, 8)  # logspace from 10^-4 to 10^-3
     timescales_ms = timescales * 1000  # convert 
     nperseg = 2048
 
