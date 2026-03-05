@@ -90,10 +90,10 @@ def main():
     plot_d(fig, spec)
 
     # add subplot labels
-    fig.text(0.00, 0.99, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.00, 0.54, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.52, 0.54, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.00, 0.27, '(D)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.00, 0.99, 'a', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.00, 0.54, 'b', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.52, 0.54, 'c', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.00, 0.27, 'd', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save
     plt.savefig(os.path.join(FIGURE_PATH, 'figure_2'), bbox_inches='tight')

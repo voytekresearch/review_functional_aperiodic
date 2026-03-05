@@ -77,10 +77,10 @@ def main():
     plot_panel_cd(fig, ax_c, ax_d)
 
     # add panel labels
-    fig.text(0.01, 0.97, '(A)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.01, 0.65, '(B)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.01, 0.35, '(C)', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.56, 0.35, '(D)', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.97, 'a', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.65, 'b', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.01, 0.35, 'c', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.56, 0.35, 'd', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save
     plt.savefig(os.path.join(FIGURE_PATH, 'figure_1'), bbox_inches='tight')
