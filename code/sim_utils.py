@@ -184,6 +184,9 @@ def spikes_to_lfp(spikes, fs):
 
     # convolve spikes with synaptic kernel
     lfp, time = convolve_psps(pop_spikes, fs)
+
+    # demean
+    lfp = lfp - np.mean(lfp)
     
     return lfp, time
 
