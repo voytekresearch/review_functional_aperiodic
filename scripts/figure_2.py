@@ -60,7 +60,8 @@ np.random.seed(0)
 F_RANGE = [1, 100]
 
 # figure
-plt.style.use('mplstyle/trends_cogn_sci.mplstyle')
+plt.style.use('mplstyle/nhb.mplstyle')
+FIGURE_HEIGHT = FIGURE_WIDTH * 1.6
 COLORS = ["#7570b3", "#3FAA96", "#F39943"]
 
 # SET-UP #######################################################################
@@ -81,22 +82,22 @@ def main():
     sync, exp, reg = correlate_synchrony_and_exponent()
 
     # init figure
-    fig = plt.figure(figsize=[FIGURE_WIDTH, 8], constrained_layout=True)
-    spec = gridspec.GridSpec(ncols=2, nrows=5, figure=fig, width_ratios=[1,1],
-                             height_ratios=[1, 1, 1, 2, 3], wspace=0)
+    fig = plt.figure(figsize=[FIGURE_WIDTH, FIGURE_HEIGHT])
+    spec = gridspec.GridSpec(ncols=1, nrows=3, figure=fig, top=0.95, 
+                             bottom=0.07, height_ratios=[3, 2, 2], hspace=0.5)
 
     # plot panels
     plot_abc(fig, spec, spikes, time, lfp, freqs, spectra, sync, exp, reg)
     plot_d(fig, spec)
 
     # add subplot labels
-    fig.text(0.00, 0.99, 'a', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.00, 0.54, 'b', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.52, 0.54, 'c', fontsize=PANEL_FONTSIZE, fontweight='bold')
-    fig.text(0.00, 0.27, 'd', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.02, 0.98, 'a', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.02, 0.58, 'b', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.50, 0.58, 'c', fontsize=PANEL_FONTSIZE, fontweight='bold')
+    fig.text(0.02, 0.29, 'd', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save
-    plt.savefig(os.path.join(FIGURE_PATH, 'figure_2'), bbox_inches='tight')
+    plt.savefig(os.path.join(FIGURE_PATH, 'figure_2'))
 
 
 def simulate_2_process_lfp(coupled, coupling_strength, n_seconds=1, fs=1000,
@@ -250,22 +251,28 @@ def plot_abc(fig, spec, spikes, time, lfp, freqs, spectra, sync, exp, reg):
     """
 
     # create subplots
-    ax0 = fig.add_subplot(spec[0, :])
-    ax1 = fig.add_subplot(spec[1, :])
-    ax2 = fig.add_subplot(spec[2, :])
-    ax3 = fig.add_subplot(spec[3, 0])
-    ax4 = fig.add_subplot(spec[3, 1])
+    gs_a = gridspec.GridSpecFromSubplotSpec(3, 1, subplot_spec=spec[0, :],
+                                            hspace=0.5)
+    ax0 = fig.add_subplot(gs_a[0])
+    ax1 = fig.add_subplot(gs_a[1, :])
+    ax2 = fig.add_subplot(gs_a[2, :])
+
+    gs_bc = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=spec[1, :],
+                                            wspace=0.4)
+    axb = fig.add_subplot(gs_bc[0])
+    axc = fig.add_subplot(gs_bc[1])
 
     # plot spikes and lfp
-    for ii, ax in enumerate([ax0,ax1,ax2]):
+    for ii, (ax, ytick) in enumerate(zip([ax0, ax1, ax2], [2, 5, 10])):
         # plot spikes
-        ax.eventplot(spikes[ii], color='grey')
+        ax.eventplot(spikes[ii], color='grey', linewidths=0.2)
         ax.set(ylabel='neuron #')
         ax.set_xlim([0, N_SECONDS])
 
         # plot LFP
         axr = ax.twinx() 
-        axr.plot(time[:len(lfp[0])], lfp[ii], linewidth=1, color=COLORS[ii])
+        axr.plot(time[:len(lfp[0])], lfp[ii], linewidth=0.5, color=COLORS[ii])
+        axr.set_yticks([-ytick, ytick])
         axr.set(ylabel='voltage (au)')
 
     # labels
@@ -276,27 +283,27 @@ def plot_abc(fig, spec, spikes, time, lfp, freqs, spectra, sync, exp, reg):
     # plot PSD
     labels = ['desync.', 'low-sync.', 'high-sync.']
     for ii in range(len(spectra)):
-        ax3.loglog(freqs, spectra[ii], color=COLORS[ii])
-        ax3.set(xlabel='frequency (Hz)', ylabel='power (au)')
-    ax3.legend(labels, loc='lower left')
+        axb.loglog(freqs, spectra[ii], color=COLORS[ii])
+        axb.set(xlabel='frequency (Hz)', ylabel='power (au)')
+    axb.legend(labels, loc='lower left')
 
     # plot regression results
     colors = [COLORS[0], 'k', 'k', 'k', 'k', COLORS[1], 'k', 'k', 'k', 'k', 
               COLORS[2]] # color those from earlier panels
-    ax4.scatter(sync, exp, color=colors)
-    ax4.set(xlabel='mean correlation', ylabel='exponent')
+    axc.scatter(sync, exp, color=colors)
+    axc.set(xlabel='mean correlation', ylabel='exponent')
     model = [sync.min() * reg[0] + reg[1],
              sync.max() * reg[0] + reg[1]]
-    ax4.plot([sync.min(), sync.max()], model, color='k', linestyle='--',
+    axc.plot([sync.min(), sync.max()], model, color='k', linestyle='--',
              label=f'r: {np.round(reg[2], 3)} \np: {reg[3]:0.2e}')
-    ax4.legend(loc='lower right')
+    axc.legend(loc='lower right')
 
     # set titles
     ax0.set_title('Desynchronized')
     ax1.set_title('Low-synchrony')
     ax2.set_title('High-synchrony')
-    ax3.set_title('Power spectra')
-    ax4.set_title('Linear regression')
+    axb.set_title('Power spectra')
+    axc.set_title('Linear regression')
 
 
 def damped_oscillator(t, f, alpha, gamma):
@@ -344,11 +351,11 @@ def plot_d(fig, spec, n_seconds=10, fs=1000, osc_freq=10):
                                       f_range=[4, 100])
 
     # init nested gridspec
-    gs = gridspec.GridSpecFromSubplotSpec(5, 3, subplot_spec=spec[4, :],
-                                          width_ratios=[0.1, 2, 1],
-                                          height_ratios=[0.1, 1, 1, 1, 1])
-    axes_0 = [fig.add_subplot(gs[i, 1]) for i in range(1, 5)]
-    ax1 = fig.add_subplot(gs[1:, 2])
+    gs = gridspec.GridSpecFromSubplotSpec(4, 2, subplot_spec=spec[2, :],
+                                          width_ratios=[1, 1], wspace=0.5,
+                                          hspace=0)
+    axes_0 = [fig.add_subplot(gs[i, 0]) for i in range(4)]
+    ax1 = fig.add_subplot(gs[:, 1])
 
     # plot damped signals
     for ii, (ax, signal_i) in enumerate(zip(axes_0, signals)):
@@ -362,8 +369,7 @@ def plot_d(fig, spec, n_seconds=10, fs=1000, osc_freq=10):
         ax.set_xticks([])
     axes_0[-1].set_xticks([0, 1, 2], labels=['0', '1', '2'])
     axes_0[0].set_title("Damped oscillators")
-    fig.text(0.00, 0.14, 'amplitude (au)', va='center', rotation='vertical', 
-             fontsize=10)
+    fig.text(0.07, 0.17, 'amplitude (au)', va='center', rotation='vertical')
 
     # plot spectra
     for ii in range(spectra.shape[0]):

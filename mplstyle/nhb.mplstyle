@@ -1,0 +1,20 @@
+### https://www.nature.com/documents/NRJs-guide-to-preparing-final-artwork.pdf
+
+### Text
+font.family : sans-serif
+font.sans-serif : arial
+font.size : 6
+figure.titlesize : 7
+axes.titlesize : 7
+axes.labelsize : 6
+xtick.labelsize : 5
+ytick.labelsize : 5
+legend.fontsize : 5
+
+#3# figure
+lines.linewidth : 1.0
+lines.markersize : 4.0
+
+### Saving
+savefig.dpi : 300
+savefig.format : pdf

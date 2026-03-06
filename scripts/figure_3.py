@@ -39,7 +39,8 @@ DELTA_EXPONENT = -0.5 # change in aperiodic exponent (negative value for counter
 F_ROTATION = 40 # rotation frequency (Hz)
 
 # figure settings
-plt.style.use('mplstyle/trends_cogn_sci.mplstyle')
+plt.style.use('mplstyle/nhb.mplstyle')
+FIGURE_HEIGHT = FIGURE_WIDTH * 0.8
 COLS = (np.array([60,171,147])/255,
         np.array([244,157,70])/255)
 
@@ -152,7 +153,7 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv):
     n_samples = N_SECONDS*FS//2
 
     # create figure and gridspec
-    fig = plt.figure(figsize=[FIGURE_WIDTH, 4], constrained_layout=True)
+    fig = plt.figure(figsize=[FIGURE_WIDTH, FIGURE_HEIGHT], constrained_layout=True)
     spec = gridspec.GridSpec(figure=fig, ncols=2, nrows=2, hspace=0.1,
                              width_ratios=[1, 0.36], height_ratios=[1,1])
     ax_b = fig.add_subplot(spec[0,1])
@@ -178,8 +179,7 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv):
             ax.set_xticks([])
     ax_a4.spines['bottom'].set_visible(True)
     ax_a4.set(xlabel='time (s)')
-    fig.text(0.015, 0.76, 'Voltage (au)', ha='center', va='center', rotation=90, 
-             fontsize=8)
+    fig.text(0.015, 0.8, 'voltage (au)', ha='center', va='center', rotation=90)
 
     # plot subplot b: Power spectra (pre v. post)
     ax_b.loglog(freqs, spectra[0], label='pre', color=COLS[0])
@@ -195,7 +195,7 @@ def plot_results(time, signal, freqs, spectra, exponent, ttv):
     ax_c.plot(time[n_samples:], sig_var[n_samples:], color=COLS[1])
     ax_c.plot(time[:n_samples], np.repeat(sig_var_win[0], n_samples), color='k')
     ax_c.plot(time[n_samples:], np.repeat(sig_var_win[1], n_samples), color='k')
-    ax_c.axvline(0, color='grey', linestyle='--', linewidth=3)
+    ax_c.axvline(0, color='grey', linestyle='--', linewidth=1)
     ax_c.set(xlabel='time (s)', ylabel='variance')
 
     # plot subplot d: TTV v. Exponent

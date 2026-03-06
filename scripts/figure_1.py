@@ -21,6 +21,7 @@ from scipy.signal import detrend, get_window
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
+import matplotlib.ticker as mticker
 
 from neurodsp.sim.transients import sim_synaptic_kernel
 from neurodsp.utils import create_times
@@ -41,7 +42,8 @@ N_NEURONS = 100 # number of neurons in the population
 MEAN_RATE = 10 # average rate of each neuron (Hz)
 
 # figure
-plt.style.use('mplstyle/trends_cogn_sci.mplstyle')
+plt.style.use('mplstyle/nhb.mplstyle')
+FIGURE_HEIGHT = FIGURE_WIDTH * 1.2
 
 # SET-UP #######################################################################
 
@@ -64,9 +66,10 @@ def main():
     """
         
     # set up gridspec
-    fig = plt.figure(figsize=[FIGURE_WIDTH, 6], constrained_layout=True)
-    spec = gridspec.GridSpec(ncols=2, nrows=3, figure=fig, width_ratios=[1,1],
-                             height_ratios=[1, 0.6, 1], hspace=0.1)
+    fig = plt.figure(figsize=[FIGURE_WIDTH, FIGURE_HEIGHT])
+    spec = gridspec.GridSpec(ncols=2, nrows=3, figure=fig, hspace=0.6, 
+                             wspace=0.5, top=0.95,
+                             height_ratios=[1, 0.6, 1])
     ax_a = fig.add_subplot(spec[0, :])
     ax_b = fig.add_subplot(spec[1, :])
     ax_c = fig.add_subplot(spec[2, 0])
@@ -83,7 +86,7 @@ def main():
     fig.text(0.56, 0.35, 'd', fontsize=PANEL_FONTSIZE, fontweight='bold')
 
     # save
-    plt.savefig(os.path.join(FIGURE_PATH, 'figure_1'), bbox_inches='tight')
+    plt.savefig(os.path.join(FIGURE_PATH, 'figure_1'))
 
 
 def plot_panel_ab(ax_a, ax_b):
@@ -116,14 +119,14 @@ def plot_panel_ab(ax_a, ax_b):
     # plot currents 
     for i_current in range(n2plot):
         ax_a.plot(time_current, currents[i_current] + i_current, color='k')
-    ax_a.set(xlabel="", ylabel="current (au)")
+    ax_a.set(xlabel="time (s)", ylabel="current (au)")
     ax_a.set_title("Synaptic currents")
 
     # add annotation to right of ax indication that this is a subset of currents
     ax_a0b = ax_a.twinx()
     ax_a0b.set_ylim(ax_a.get_ylim())
     ax_a0b.tick_params(axis='y', length=0)  # hide ticks
-    ax_a0b.text(1.04, 0.5, "neuron index", transform=ax_a.transAxes, 
+    ax_a0b.text(1.06, 0.5, "neuron index", transform=ax_a.transAxes, 
             ha='center', va='center', color='k', rotation=270)
     ax_a0b.set_yticks(np.arange(0, n2plot))
     ax_a0b.set_yticklabels(['N', r'$\cdots$', '8', '7', '6', '5', '4', '3', '2', '1'])
@@ -184,9 +187,8 @@ def plot_panel_cd(fig, ax_c, ax_d):
         ax_c.plot(time*1000, psp[ii], color=sm.to_rgba(timescale))
         ax_d.loglog(freqs, spectra[ii], color=sm.to_rgba(timescale))
 
-    # plot delta function representation
-    ax_c.plot([0, 0], [0, np.max(psp)], color='k')  # vertical line at t=0
-    ax_c.plot(time*1000, np.zeros_like(time), color='k')  # horizontal line at y=0
+    # plot delta function
+    ax_c.plot(time*1000, psp[-1], color='k')  # plot dirac delta function
     ax_d.loglog(freqs, spectra[-1], color='k')
 
     # label plot
@@ -198,12 +200,10 @@ def plot_panel_cd(fig, ax_c, ax_d):
     ax_d.set(xlabel="frequency (Hz)", ylabel="power (au)")
 
     # add colorbar for timescale
-    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-    cbax = inset_axes(ax_d, width="3%", height="90%", loc='lower left',
-                      bbox_to_anchor=(1.02, 0.05, 1, 1), 
-                      bbox_transform=ax_d.transAxes, borderpad=0)
-    fig.colorbar(sm, cax=cbax, label='timescale (ms)')
-
+    cbar = fig.colorbar(sm, ax=ax_d, label='timescale (ms)')
+    cbar.set_ticks([1e-1, 1e0])
+    cbar.ax.yaxis.set_minor_locator(mticker.NullLocator())
+    cbar.minorticks_off()
 
 def sim_lfp(n_neurons=1000, mean_rate=2, n_seconds=10, fs=1000, 
             tau_rise=0., tau_decay=0.01, t_kernel=None, return_spikes=False):
